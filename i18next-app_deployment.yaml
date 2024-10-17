@@ -28,6 +28,6 @@ spec:
     app: i18next-app
   ports:
     - protocol: TCP
-      port: 80
+      port: 5173
       targetPort: 5173
   type: LoadBalancer
