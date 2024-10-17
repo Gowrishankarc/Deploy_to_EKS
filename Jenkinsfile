@@ -44,11 +44,8 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying to EKS...'
-                    dir('kubernetes') {
-                        sh "aws eks update-kubeconfig --name abhi-eks-O5s37h8p"
-                        sh "kubectl apply -f i18next-app_deployment.yaml"
-                
-                    }
+                    sh "aws eks update-kubeconfig --name abhi-eks-O5s37h8p"
+                    sh "kubectl apply -f i18next-app_deployment.yaml"
                 }
             }
         }
