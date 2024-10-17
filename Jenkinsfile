@@ -5,6 +5,9 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Jenkins credentials ID for Docker Hub
         DOCKERHUB_REPO = '8197495215/i18next-app'        // Your Docker Hub repository
         IMAGE_TAG = 'latest'                             // Image tag
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID') // AWS credentials ID
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY') // AWS credentials ID
+        AWS_DEFAULT_REGION = "us-east-1"                // AWS region
     }
 
     stages {
@@ -36,11 +39,25 @@ pipeline {
                 }
             }
         }
+
+        stage("Deploy to EKS") {
+            steps {
+                script {
+                    echo 'Deploying to EKS...'
+                    dir('kubernetes') {
+                        sh "aws eks update-kubeconfig --name abhi-eks"
+                        sh "kubectl apply -f i18next-app_deployment.yaml"
+                
+                    }
+                }
+            }
+        }
     }
 
     post {
         success {
             echo 'Docker image built and pushed to Docker Hub successfully!'
+            echo 'Deployed to EKS cluster successfully!'
         }
         failure {
             echo 'Pipeline failed!'
