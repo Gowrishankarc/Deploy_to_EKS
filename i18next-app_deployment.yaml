@@ -15,7 +15,7 @@ spec:
       containers:
       - name: i18next-app-container
         image: i18next-app:latest
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         ports:
         - containerPort: 5173
 ---
@@ -30,7 +30,8 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 5173
-  type: NodePort
+  type: LoadBalancer
+
 
 
 
