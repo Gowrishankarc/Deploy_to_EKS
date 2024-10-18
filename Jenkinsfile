@@ -20,7 +20,7 @@ pipeline {
                 script {
                     echo 'Building Docker image...'
                     // Ensure Docker is accessible and build the image
-                    app = docker.build("$DOCKERHUB_REPO:$IMAGE_TAG")
+                    app = docker.build("$DOCKERHUB_REPO")
                 }
             }
         }
