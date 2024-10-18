@@ -5,9 +5,6 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Jenkins credentials ID for Docker Hub
         DOCKERHUB_REPO = '8197495215/i18next-app'        // Your Docker Hub repository
         IMAGE_TAG = 'latest'                             // Image tag
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID') // AWS credentials ID
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY') // AWS credentials ID
-        AWS_DEFAULT_REGION = "us-east-1"                // AWS region
     }
 
     stages {
@@ -24,7 +21,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh 'docker build -t $DOCKERHUB_REPO:$IMAGE_TAG .'
+                    app = docker.build("$DOCKERHUB_REPO:$IMAGE_TAG")  // Build the Docker image and assign it to 'app' variable
                 }
             }
         }
@@ -34,31 +31,22 @@ pipeline {
                 script {
                     echo 'Logging into Docker Hub...'
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+
                     echo 'Pushing image to Docker Hub...'
-                    sh 'docker push $DOCKERHUB_REPO:$IMAGE_TAG'
+                    app.push("${env.BUILD_NUMBER}")  // Push the image with the Jenkins build number as the tag
                 }
             }
         }
 
-        stage("Deploy to EKS") {
+        stage('Trigger ManifestUpdate') {
             steps {
                 script {
-                    echo 'Deploying to EKS...'
-                    sh "aws eks update-kubeconfig --name myapp-eks-cluster"
-                    sh "kubectl apply -f i18next-app_deployment.yaml"
-
+                    echo 'Triggering updatemanifest job...'
+                    build job: 'updatemanifest', parameters: [
+                        string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)
+                    ]
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Docker image built and pushed to Docker Hub successfully!'
-            echo 'Deployed to EKS cluster successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
