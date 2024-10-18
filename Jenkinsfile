@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    app = docker.build("$DOCKERHUB_REPO:$IMAGE_TAG")  // Build the Docker image and assign it to 'app' variable
+                    app = docker.build("$DOCKERHUB_REPO")  // Build the Docker image and assign it to 'app' variable
                 }
             }
         }
