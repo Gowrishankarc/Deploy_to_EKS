@@ -10,9 +10,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                script {
-                    echo 'Cloning the repository...'
-                }
+                echo 'Cloning the repository...'
                 git branch: 'main', url: 'https://github.com/Gowrishankarc/Deploy_to_EKS.git'
             }
         }
@@ -21,7 +19,8 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    app = docker.build("$DOCKERHUB_REPO")  // Build the Docker image and assign it to 'app' variable
+                    // Ensure Docker is accessible and build the image
+                    app = docker.build("$DOCKERHUB_REPO:$IMAGE_TAG")
                 }
             }
         }
@@ -34,6 +33,7 @@ pipeline {
 
                     echo 'Pushing image to Docker Hub...'
                     app.push("${env.BUILD_NUMBER}")  // Push the image with the Jenkins build number as the tag
+                    app.push("latest")  // Optionally push the 'latest' tag
                 }
             }
         }
